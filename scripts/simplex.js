@@ -1,5 +1,5 @@
 // https://github.com/blindman67/SimplexNoiseJS/blob/master/simplexNoise.js
-// Author: Mark Spronck
+// Author: Mark Spronck under public domain license 5/11/2024
 
 export default
 function openSimplexNoise(clientSeed) {

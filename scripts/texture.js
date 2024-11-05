@@ -7,7 +7,7 @@ class Texture {
 
 		const isBase2 = isPowerOf2(img.width * img.height);
 		const wrapMode = isBase2 ? gl.REPEAT : gl.CLAMP_TO_EDGE;
-		
+
 		gl.bindTexture(gl.TEXTURE_2D, this.id);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);

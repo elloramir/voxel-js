@@ -1,5 +1,6 @@
 import Mesh from './mesh.js';
 import Simplex from "./simplex.js";
+import Blocks from './blocks.js';
 
 const CHUNK_WIDTH = 16;
 const CHUNK_HEIGHT = 16;
@@ -9,10 +10,6 @@ const CHUNK_AREA = CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH;
 const NOISE_SMOOTHNESS = 20;
 const WATER_HEIGHT = 4;
 
-const BLOCK_EMPTY = 0;
-const BLOCK_GRASS = 1;
-const BLOCK_WATER = 2;
-
 export default
 class Chunk {
     static simplex = Simplex(0xdeadbeef);
@@ -21,7 +18,7 @@ class Chunk {
         this.x = x;
         this.z = z;
 
-        this.data = new Uint8Array(CHUNK_AREA);
+        this.data = new Uint8Array(CHUNK_AREA).fill(Blocks.EMPTY);
         this.groundMesh = new Mesh();
         this.waterMesh = new Mesh();
 
@@ -35,12 +32,12 @@ class Chunk {
 
     getBlock(x, y, z) {
         if (y < 0 || y >= CHUNK_HEIGHT) {
-            return BLOCK_EMPTY;
+            return Blocks.EMPTY;
         }
 
         // @todo: Neighbouring chunks
         if (x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_LENGTH) {
-            return BLOCK_EMPTY;
+            return Blocks.EMPTY;
         }
 
         return this.data[Chunk.index(x, y, z)];
@@ -49,7 +46,7 @@ class Chunk {
     isTransparent(x, y, z) {
         const block = this.getBlock(x, y, z);
 
-        return block === BLOCK_EMPTY || block === BLOCK_WATER;
+        return block === Blocks.EMPTY || block === Blocks.WATER;
     }
 
     generateTerrain() {
@@ -63,16 +60,19 @@ class Chunk {
 
                 // Normalize from [-1, 1] to [0, 1]
                 const value = (Chunk.simplex.noise2D(noiseX, noiseZ) + 1) * 0.5;
-                let height = Math.floor(value * CHUNK_HEIGHT);
+                const height = Math.floor(value * CHUNK_HEIGHT);
 
-                while (height > 0) {
-                    this.data[Chunk.index(x, height, z)] = BLOCK_GRASS;
-                    height--;
+                for (let y = 0; y < height; y++) {
+                    if (y === height - 1) {
+                        this.data[Chunk.index(x, y, z)] = Blocks.GRASS;
+                    } else {
+                        this.data[Chunk.index(x, y, z)] = Blocks.DIRTY;
+                    }
                 }
 
                 // Water block on empty spaces around water level
-                if (this.getBlock(x, WATER_HEIGHT, z) === BLOCK_EMPTY) {
-                    this.data[Chunk.index(x, WATER_HEIGHT, z)] = BLOCK_WATER;
+                if (this.getBlock(x, WATER_HEIGHT, z) === Blocks.EMPTY) {
+                    this.data[Chunk.index(x, WATER_HEIGHT, z)] = Blocks.WATER;
                 }
             }
         }
@@ -85,31 +85,31 @@ class Chunk {
                     const block = this.getBlock(x, y, z);
 
                     // Skip empty blocks
-                    if (block === BLOCK_EMPTY) {
+                    if (block === Blocks.EMPTY) {
                         continue;
-                    } else if (block === BLOCK_WATER) {
-                        this.waterMesh.addFace("bottom", x, y, z);
+                    } else if (block === Blocks.WATER) {
+                        this.waterMesh.blockFace("bottom", block, x, y, z);
                         continue;
                     }
 
                     // All other visible faces
                     if (this.isTransparent(x, y, z-1)) {
-                        this.groundMesh.addFace("north", x, y, z);
+                        this.groundMesh.blockFace("north", block, x, y, z);
                     }
                     if (this.isTransparent(x, y, z+1)) {
-                        this.groundMesh.addFace("south", x, y, z);
+                        this.groundMesh.blockFace("south", block, x, y, z);
                     }
                     if (this.isTransparent(x+1, y, z)) {
-                        this.groundMesh.addFace("east", x, y, z);
+                        this.groundMesh.blockFace("east", block, x, y, z);
                     }
                     if (this.isTransparent(x-1, y, z)) {
-                        this.groundMesh.addFace("west", x, y, z);
+                        this.groundMesh.blockFace("west", block, x, y, z);
                     }
                     if (this.isTransparent(x, y+1, z)) {
-                        this.groundMesh.addFace("top", x, y, z);
+                        this.groundMesh.blockFace("top", block, x, y, z);
                     }
                     if (this.isTransparent(x, y-1, z)) {
-                        this.groundMesh.addFace("bottom", x, y, z);
+                        this.groundMesh.blockFace("bottom", block, x, y, z);
                     }
                 }
             }

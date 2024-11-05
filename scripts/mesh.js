@@ -1,4 +1,5 @@
 import { Mat4 } from "./math.js";
+import Blocks from "./blocks.js";
 
 // @todo: Transform matrix
 export default
@@ -23,7 +24,7 @@ class Mesh {
     lastQuad(a, b, c, d, e, f) {
         const i = this.numVertices - 4;
         
-        this.indices.push(i+a, i+b, i+c, i+d, i+e, i+f);
+        this.indices.push(i + a, i + b, i + c, i + d, i + e, i + f);
         this.numIndices += 6;
     }
 
@@ -64,7 +65,9 @@ class Mesh {
         gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
     }
 
-    addFace(face, i, j, k) {
+    // As you can see, this class is not generic at all and
+    // are made exclusively for the game's needs.
+    blockFace(face, block, i, j, k) {
         const xp =  0.5 + i;
         const xn = -0.5 + i;
         const yp =  0.5 + j;
@@ -72,47 +75,50 @@ class Mesh {
         const zp =  0.5 + k;
         const zn = -0.5 + k;
 
+        const dir = face !== "top" && face !== "bottom" ? "side" : face;
+        const [u0, v0, u1, v1] = Blocks.blocks.get(block)[dir];
+
         switch(face) {
         case "north":
-            this.vertex(xp, yp, zn, 0, 0, -1, 1, 1);
-            this.vertex(xp, yn, zn, 0, 0, -1, 1, 0);
-            this.vertex(xn, yn, zn, 0, 0, -1, 0, 0);
-            this.vertex(xn, yp, zn, 0, 0, -1, 0, 1);
+            this.vertex(xp, yp, zn, 0, 0, -1, u1, v1);
+            this.vertex(xp, yn, zn, 0, 0, -1, u1, v0);
+            this.vertex(xn, yn, zn, 0, 0, -1, u0, v0);
+            this.vertex(xn, yp, zn, 0, 0, -1, u0, v1);
             this.lastQuad(0, 1, 2, 0, 2, 3);
         break;
         case "south":
-            this.vertex(xn, yp, zp, 0, 0, 1, 0, 1);
-            this.vertex(xn, yn, zp, 0, 0, 1, 0, 0);
-            this.vertex(xp, yn, zp, 0, 0, 1, 1, 0);
-            this.vertex(xp, yp, zp, 0, 0, 1, 1, 1);
+            this.vertex(xn, yp, zp, 0, 0, 1, u0, v1);
+            this.vertex(xn, yn, zp, 0, 0, 1, u0, v0);
+            this.vertex(xp, yn, zp, 0, 0, 1, u1, v0);
+            this.vertex(xp, yp, zp, 0, 0, 1, u1, v1);
             this.lastQuad(0, 1, 2, 0, 2, 3);
         break;
         case "east":
-            this.vertex(xp, yp, zn, 1, 0, 0, 1, 1);
-            this.vertex(xp, yn, zp, 1, 0, 0, 0, 0);
-            this.vertex(xp, yn, zn, 1, 0, 0, 1, 0);
-            this.vertex(xp, yp, zp, 1, 0, 0, 0, 1);
+            this.vertex(xp, yp, zn, 1, 0, 0, u1, v1);
+            this.vertex(xp, yn, zp, 1, 0, 0, u0, v0);
+            this.vertex(xp, yn, zn, 1, 0, 0, u1, v0);
+            this.vertex(xp, yp, zp, 1, 0, 0, u0, v1);
             this.lastQuad(0, 1, 2, 3, 1, 0);
         break;
         case "west":
-            this.vertex(xn, yp, zn, -1, 0, 0, 0, 1);
-            this.vertex(xn, yn, zn, -1, 0, 0, 0, 0);
-            this.vertex(xn, yn, zp, -1, 0, 0, 1, 0);
-            this.vertex(xn, yp, zp, -1, 0, 0, 1, 1);
+            this.vertex(xn, yp, zn, -1, 0, 0, u0, v1);
+            this.vertex(xn, yn, zn, -1, 0, 0, u0, v0);
+            this.vertex(xn, yn, zp, -1, 0, 0, u1, v0);
+            this.vertex(xn, yp, zp, -1, 0, 0, u1, v1);
             this.lastQuad(0, 1, 2, 3, 0, 2);
         break;
         case "top":
-            this.vertex(xn, yp, zp, 0, 1, 0, 0, 0);
-            this.vertex(xp, yp, zp, 0, 1, 0, 1, 0);
-            this.vertex(xn, yp, zn, 0, 1, 0, 0, 1);
-            this.vertex(xp, yp, zn, 0, 1, 0, 1, 1);
+            this.vertex(xn, yp, zp, 0, 1, 0, u0, v0);
+            this.vertex(xp, yp, zp, 0, 1, 0, u1, v0);
+            this.vertex(xn, yp, zn, 0, 1, 0, u0, v1);
+            this.vertex(xp, yp, zn, 0, 1, 0, u1, v1);
             this.lastQuad(0, 1, 2, 2, 1, 3);
         break;
         case "bottom":
-            this.vertex(xn, yn, zp, 0, -1, 0, 0, 1);
-            this.vertex(xn, yn, zn, 0, -1, 0, 0, 0);
-            this.vertex(xp, yn, zp, 0, -1, 0, 1, 1);
-            this.vertex(xp, yn, zn, 0, -1, 0, 1, 0);
+            this.vertex(xn, yn, zp, 0, -1, 0, u0, v1);
+            this.vertex(xn, yn, zn, 0, -1, 0, u0, v0);
+            this.vertex(xp, yn, zp, 0, -1, 0, u1, v1);
+            this.vertex(xp, yn, zn, 0, -1, 0, u1, v0);
             this.lastQuad(0, 1, 2, 1, 3, 2);
         break;
         }
