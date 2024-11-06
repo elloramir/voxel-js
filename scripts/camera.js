@@ -15,7 +15,7 @@ class Camera {
 
         this.fov = degToRad(60);
         this.yaw = degToRad(270);
-        this.pitch = 0;
+        this.pitch = degToRad(-35);
 
         this.isDragging = false;
         this.mouseOffset = new Vec2(0, 0);
@@ -59,8 +59,8 @@ class Camera {
         if (spdx !== 0 || spdy !== 0) {
             const angle = Math.atan2(spdx, spdy);
 
-            this.position.x += Math.sin(this.yaw + angle) * 0.1;
-            this.position.z -= Math.cos(this.yaw + angle) * 0.1;
+            this.position.x += Math.sin(this.yaw + angle) * 0.3;
+            this.position.z -= Math.cos(this.yaw + angle) * 0.3;
         }
     }
 
@@ -89,10 +89,10 @@ class Camera {
 
         // up and down
         if (input.isKeyDown(" ")) {
-            this.position.y += 0.1;
+            this.position.y += 0.3;
         }
         if (input.isKeyDown("shift")) {
-            this.position.y -= 0.1;
+            this.position.y -= 0.3;
         }
     }
 

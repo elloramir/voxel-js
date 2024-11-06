@@ -17,9 +17,6 @@ window.onload = async function() {
     const camera = new Camera(0, 20, 10);
     const input = new Input();
 
-    // Make the camera look down
-    camera.pitch = -0.8;
-
     const shader = await Shader.loadFromFile(
         "assets/basic.vert",
         "assets/basic.frag"
@@ -28,26 +25,27 @@ window.onload = async function() {
     Blocks.atlas = await Texture.loadFromFile("assets/atlas.png");
     Blocks.add(Blocks.GRASS, 2, 1, 0);
     Blocks.add(Blocks.DIRTY, 0, 0, 0);
-    Blocks.add(Blocks.WATER, 18, 18, 18);
+    Blocks.add(Blocks.WATER, 18, 0, 0);
 
     // Create world chunk
     const world = new World();
 
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
     function render() {
         gl.clearColor(0.2, 0.5, 0.8, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.enable(gl.DEPTH_TEST);
-        gl.enable(gl.CULL_FACE);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, Blocks.atlas.id);
 
         camera.updateFreeView(input);
         camera.update();
         camera.bind(shader);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, Blocks.atlas.id);
-
+        world.tryGenerateChunk(camera.position.x, camera.position.z);
         world.render(shader);
 
         requestAnimationFrame(render);

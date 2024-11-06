@@ -26,12 +26,23 @@ class World {
         return this.chunks.get(this.index(x, z));
     }
 
-    // Returns a block from any chunk based on the global coordinates
-    getBlock(x, y, z) {
-        if (y >= Chunk.HEIGHT || y < 0) {
-            return Blocks.EMPTY;
-        }
+    getChunkAt(x, z) {
+        const cx = Math.floor(x / Chunk.WIDTH);
+        const cz = Math.floor(z / Chunk.LENGTH);
 
+        return this.getChunk(cx, cz);
+    }
+
+    generateChunk(x, z) {
+        if (!this.getChunk(x, z)) {
+            const chunk = new Chunk(x, z, this);
+            this.chunks.set(this.index(x, z), chunk);
+            chunk.updateMeshs();
+        }
+    }
+
+    // Returns a block from any chunk based on the global coordinates
+    getBlockAt(x, y, z) {
         const cx = Math.floor(x / Chunk.WIDTH);
         const cz = Math.floor(z / Chunk.LENGTH);
         const chunk = this.getChunk(cx, cz);
@@ -41,6 +52,15 @@ class World {
         }
 
         return chunk.getBlock(x - cx * Chunk.WIDTH, y, z - cz * Chunk.LENGTH);
+    }
+
+    tryGenerateChunk(atX, atZ) {
+        const cx = Math.floor(atX / Chunk.WIDTH);
+        const cz = Math.floor(atZ / Chunk.LENGTH);
+
+        if (!this.getChunk(cx, cz)) {
+            this.generateChunk(cx, cz);
+        }
     }
 
     render(shader) {

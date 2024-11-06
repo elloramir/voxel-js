@@ -45,15 +45,14 @@ class Chunk {
 
         // Check if the block is outside the chunk
         if (x < 0 || x >= Chunk.WIDTH || z < 0 || z >= Chunk.LENGTH) {
-            return this.world.getBlock(this.absX + x, y, this.absZ + z);
+            return this.world.getBlockAt(this.absX + x, y, this.absZ + z);
         }
 
         return this.data[Chunk.index(x, y, z)];
     }
 
     isTransparent(x, y, z) {
-        // We don't need to render chunk bottom since they are not visible
-        // anyways, so we can mark it as non-transparent even if it are.
+        // Avoid render bottom
         if (y < 0) {
             return false;
         }
