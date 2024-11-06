@@ -2,7 +2,6 @@ import Shader from "./shader.js";
 import Camera from "./camera.js";
 import Texture from "./texture.js";
 import Input from "./input.js";
-import Chunk from "./chunk.js";
 import Blocks from "./blocks.js";
 import World from "./world.js";
 
@@ -45,8 +44,7 @@ window.onload = async function() {
         camera.update();
         camera.bind(shader);
 
-        world.tryGenerateChunk(camera.position.x, camera.position.z);
-        world.render(shader);
+        world.render(shader, camera);
 
         requestAnimationFrame(render);
     }

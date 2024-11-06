@@ -58,23 +58,30 @@ class World {
         }
     }
 
-    // Async is not multi-threaded, but will at least not block the main thread
-    // while generating the chunk.
-    async tryGenerateChunk(atX, atZ) {
-        const i = Math.floor(atX / Chunk.WIDTH);
-        const k = Math.floor(atZ / Chunk.LENGTH);
+    *visibleChunks(camera) {
+        const cx = Math.floor(camera.position.x / Chunk.WIDTH);
+        const cz = Math.floor(camera.position.z / Chunk.LENGTH);
 
-        if (!this.getChunk(i, k)) {
-            this.generateChunk(i, k);
+        for (let i = cx - 3; i < cx + 3; i++) {
+            for (let k = cz - 3; k < cz + 3; k++) {
+                const chunk = this.getChunk(i, k);
+
+                if (chunk) {
+                    yield chunk;
+                } else {
+                    this.generateChunk(i, k);
+                }
+            }
         }
     }
 
-    render(shader) {
-        for (const chunk of this.chunks.values()) {
+
+    render(shader, camera) {
+        for (const chunk of this.visibleChunks(camera)) {
             chunk.groundMesh.render(shader);
         }
 
-        for (const chunk of this.chunks.values()) {
+        for (const chunk of this.visibleChunks(camera)) {
             chunk.waterMesh.render(shader);
         }
     }
