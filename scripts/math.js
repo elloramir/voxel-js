@@ -50,6 +50,13 @@ export class Mat4 {
 		this.data[14] = -z.x * eye.x - z.y * eye.y - z.z * eye.z;
 		this.data[15] = 1;
 	}
+
+	translate(x, y, z) {
+		this.identity();
+		this.data[12] = x;
+		this.data[13] = y;
+		this.data[14] = z;
+	}
 }
 
 export class Vec3 {

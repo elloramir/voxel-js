@@ -8,9 +8,10 @@ varying vec3 v_position;
 
 uniform mat4 u_view;
 uniform mat4 u_proj;
+uniform mat4 u_model;
 
 void main() {
-    gl_Position = u_proj * u_view * vec4(a_position, 1.0);
+    gl_Position = u_proj * u_view * u_model * vec4(a_position, 1.0);
     // gl_Position = vec4(a_position, 1.0);
     v_texcoords = a_texcoords;
     v_normal = a_normal;

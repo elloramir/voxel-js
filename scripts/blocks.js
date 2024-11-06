@@ -2,10 +2,10 @@ const TILE_SIZE = 16;
 
 export default
 class Blocks {
-    static EMPTY = 0;
-    static GRASS = 1;
-    static DIRTY = 2;
-    static WATER = 3;
+    static EMPTY = 1;
+    static GRASS = 2;
+    static DIRTY = 3;
+    static WATER = 4;
 
     static blocks = new Map();
     static atlas = null;

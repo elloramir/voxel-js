@@ -1,24 +1,31 @@
 import Mesh from './mesh.js';
 import Simplex from "./simplex.js";
 import Blocks from './blocks.js';
-
-const CHUNK_WIDTH = 16;
-const CHUNK_HEIGHT = 16;
-const CHUNK_LENGTH = 16;
-const CHUNK_AREA = CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_LENGTH;
+import { Mat4 } from './math.js';
 
 const NOISE_SMOOTHNESS = 20;
 const WATER_HEIGHT = 4;
 
 export default
 class Chunk {
+    static WIDTH = 16;
+    static HEIGHT = 16;
+    static LENGTH = 16;
+    static AREA = 16 * 16 * 16;
+
     static simplex = Simplex(0xdeadbeef);
 
-    constructor(x, z) {
+    constructor(x, z, world) {
         this.x = x;
         this.z = z;
+        this.absX = x * Chunk.WIDTH;
+        this.absZ = z * Chunk.LENGTH;
+        this.world = world;
 
-        this.data = new Uint8Array(CHUNK_AREA).fill(Blocks.EMPTY);
+        this.model = new Mat4();
+        this.model.translate(x * Chunk.WIDTH, 0, z * Chunk.LENGTH);
+
+        this.data = new Uint8Array(Chunk.AREA).fill(Blocks.EMPTY);
         this.groundMesh = new Mesh();
         this.waterMesh = new Mesh();
 
@@ -27,40 +34,43 @@ class Chunk {
     }
 
     static index(x, y, z) {
-        return x + z * CHUNK_WIDTH + y * CHUNK_WIDTH * CHUNK_LENGTH;
+        return x + z * Chunk.WIDTH + y * Chunk.WIDTH * Chunk.LENGTH;
     }
 
     getBlock(x, y, z) {
-        if (y < 0 || y >= CHUNK_HEIGHT) {
+        if (y < 0 || y >= Chunk.HEIGHT) {
             return Blocks.EMPTY;
         }
 
-        // @todo: Neighbouring chunks
-        if (x < 0 || x >= CHUNK_WIDTH || z < 0 || z >= CHUNK_LENGTH) {
-            return Blocks.EMPTY;
+        if (x < 0 || x >= Chunk.WIDTH || z < 0 || z >= Chunk.LENGTH) {
+            return this.world.getBlock(this.absX + x, y, this.absZ + z);
         }
 
         return this.data[Chunk.index(x, y, z)];
     }
 
     isTransparent(x, y, z) {
+        // We don't need to render chunk bottom since they are not visible
+        // anyways, so we can mark it as non-transparent even if it are.
+        if (y < 0) {
+            return false;
+        }
+
+        // For the rest of the blocks, we can check if they are empty or water
         const block = this.getBlock(x, y, z);
 
         return block === Blocks.EMPTY || block === Blocks.WATER;
     }
 
     generateTerrain() {
-        const offX = this.x * CHUNK_WIDTH;
-        const offZ = this.z * CHUNK_LENGTH;
-
-        for (let x = 0; x < CHUNK_WIDTH; x++) {
-            for (let z = 0; z < CHUNK_LENGTH; z++) {
-                const noiseX = (offX + x) / NOISE_SMOOTHNESS;
-                const noiseZ = (offZ + z) / NOISE_SMOOTHNESS;
+        for (let x = 0; x < Chunk.WIDTH; x++) {
+            for (let z = 0; z < Chunk.LENGTH; z++) {
+                const noiseX = (this.absX + x) / NOISE_SMOOTHNESS;
+                const noiseZ = (this.absZ + z) / NOISE_SMOOTHNESS;
 
                 // Normalize from [-1, 1] to [0, 1]
                 const value = (Chunk.simplex.noise2D(noiseX, noiseZ) + 1) * 0.5;
-                const height = Math.floor(value * CHUNK_HEIGHT);
+                const height = Math.floor(value * Chunk.HEIGHT);
 
                 for (let y = 0; y < height; y++) {
                     if (y === height - 1) {
@@ -79,16 +89,16 @@ class Chunk {
     }
 
     updateMeshs() {
-        for (let x = 0; x < CHUNK_WIDTH; x++) {
-            for (let z = 0; z < CHUNK_LENGTH; z++) {
-                for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        for (let x = 0; x < Chunk.WIDTH; x++) {
+            for (let z = 0; z < Chunk.LENGTH; z++) {
+                for (let y = 0; y < Chunk.HEIGHT; y++) {
                     const block = this.getBlock(x, y, z);
 
                     // Skip empty blocks
                     if (block === Blocks.EMPTY) {
                         continue;
                     } else if (block === Blocks.WATER) {
-                        this.waterMesh.blockFace("bottom", block, x, y, z);
+                        // this.waterMesh.blockFace("bottom", block, x, y, z);
                         continue;
                     }
 

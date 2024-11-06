@@ -4,6 +4,7 @@ import Texture from "./texture.js";
 import Input from "./input.js";
 import Chunk from "./chunk.js";
 import Blocks from "./blocks.js";
+import World from "./world.js";
 
 window.onload = async function() {
     window.canvas = document.getElementById("screen");
@@ -26,10 +27,10 @@ window.onload = async function() {
     Blocks.add(Blocks.DIRTY, 0, 0, 0);
 
     // Create world chunk
-    const chunk = new Chunk(0, 0);
+    const world = new World();
 
     function render() {
-        gl.clearColor(0.1, 0.1, 0.1, 1);
+        gl.clearColor(0.2, 0.5, 0.8, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
@@ -40,9 +41,11 @@ window.onload = async function() {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, atlas.id);
-        chunk.groundMesh.render(shader);
+
+        world.render(shader);
+
+        requestAnimationFrame(render);
     }
 
-    setInterval(render, 1/15);
-    render();
+    requestAnimationFrame(render);
 }
