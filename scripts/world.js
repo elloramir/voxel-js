@@ -7,48 +7,29 @@ class World {
         this.chunks = new Map();
 
         // Intialized the map
-        for (let x = -2; x <= 2; x++) {
-            for (let z = -2; z <= 2; z++) {
-                this.chunks.set(this.index(x, z), new Chunk(x, z, this));
+        for (let i = -1; i < 2; i++) {
+            for (let k = -1; k < 2; k++) {
+                const chunk = new Chunk(i, k, this);
+                this.chunks.set(this.index(i, k), chunk);
             }
         }
 
+        // As we don't have any chunk generated yet, we can
+        // update all the chunks mesh at once (wich is faster).
         for (const chunk of this.chunks.values()) {
             chunk.updateMeshs();
         }
     }
 
-    index(x, z) {
-        return x + z * 1e7;
+    index(i, k) {
+        return i + k * 1e7;
     }
 
-    getChunk(x, z) {
-        return this.chunks.get(this.index(x, z));
+    getChunk(i, k) {
+        return this.chunks.get(this.index(i, k));
     }
 
-    getChunkAt(x, z) {
-        const cx = Math.floor(x / Chunk.WIDTH);
-        const cz = Math.floor(z / Chunk.LENGTH);
-
-        return this.getChunk(cx, cz);
-    }
-
-    generateChunk(x, z) {
-        if (!this.getChunk(x, z)) {
-            const chunk = new Chunk(x, z, this);
-            this.chunks.set(this.index(x, z), chunk);
-
-            chunk.updateMeshs();
-            
-            this.getChunk(x - 1, z)?.updateMeshs();
-            this.getChunk(x + 1, z)?.updateMeshs();
-            this.getChunk(x, z - 1)?.updateMeshs();
-            this.getChunk(x, z + 1)?.updateMeshs();
-        }
-    }
-
-    // Returns a block from any chunk based on the global coordinates
-    getBlockAt(x, y, z) {
+    getBlockAt(x, j, z) {
         const cx = Math.floor(x / Chunk.WIDTH);
         const cz = Math.floor(z / Chunk.LENGTH);
         const chunk = this.getChunk(cx, cz);
@@ -57,15 +38,34 @@ class World {
             return Blocks.EMPTY;
         }
 
-        return chunk.getBlock(x - cx * Chunk.WIDTH, y, z - cz * Chunk.LENGTH);
+        const i = x - cx * Chunk.WIDTH;
+        const k = z - cz * Chunk.LENGTH;
+
+        return chunk.getBlock(i, j, k);
     }
 
-    tryGenerateChunk(atX, atZ) {
-        const cx = Math.floor(atX / Chunk.WIDTH);
-        const cz = Math.floor(atZ / Chunk.LENGTH);
+    generateChunk(i, k) {
+        if (!this.getChunk(i, k)) {
+            const chunk = new Chunk(i, k, this);
+            this.chunks.set(this.index(i, k), chunk);
+            chunk.updateMeshs();
+            
+            // Update the neighbors
+            this.getChunk(i - 1, k)?.updateMeshs();
+            this.getChunk(i + 1, k)?.updateMeshs();
+            this.getChunk(i, k - 1)?.updateMeshs();
+            this.getChunk(i, k + 1)?.updateMeshs();
+        }
+    }
 
-        if (!this.getChunk(cx, cz)) {
-            this.generateChunk(cx, cz);
+    // Async is not multi-threaded, but will at least not block the main thread
+    // while generating the chunk.
+    async tryGenerateChunk(atX, atZ) {
+        const i = Math.floor(atX / Chunk.WIDTH);
+        const k = Math.floor(atZ / Chunk.LENGTH);
+
+        if (!this.getChunk(i, k)) {
+            this.generateChunk(i, k);
         }
     }
 

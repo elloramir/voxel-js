@@ -20,7 +20,7 @@ class Texture {
 		}
 	}
 
-	static loadFromFile(file) {
+	static async loadFromFile(file) {
 		return new Promise((resolve, reject) => {
 			const img = new Image();
 			img.onload = () => {

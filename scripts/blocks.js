@@ -23,6 +23,7 @@ class Blocks {
 
         const u0 = x / cols + tinyX;
         const u1 = (x + 1) / cols - tinyX;
+
         let v0 = y / rows + tinyY;
         let v1 = (y + 1) / rows - tinyY;
 

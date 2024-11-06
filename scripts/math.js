@@ -52,7 +52,6 @@ export class Mat4 {
 	}
 
 	translate(x, y, z) {
-		this.identity();
 		this.data[12] = x;
 		this.data[13] = y;
 		this.data[14] = z;

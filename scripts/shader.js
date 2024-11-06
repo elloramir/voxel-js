@@ -68,7 +68,7 @@ class Shader {
 		return shader;
 	}
 
-	static loadFromFile(vsFile, fsFile) {
+	static async loadFromFile(vsFile, fsFile) {
 		const a = fetch(vsFile).then(r => r.text());
 		const b = fetch(fsFile).then(r => r.text());
 

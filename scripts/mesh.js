@@ -1,7 +1,6 @@
 import { Mat4 } from "./math.js";
 import Blocks from "./blocks.js";
 
-// @todo: Transform matrix
 export default
 class Mesh {
     constructor() {
@@ -9,6 +8,7 @@ class Mesh {
         this.ibo = gl.createBuffer();
 
         this.model = new Mat4();
+        this.model.identity();
         
         this.vertices = [];
         this.indices = [];
