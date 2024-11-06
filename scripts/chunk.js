@@ -9,28 +9,29 @@ const WATER_HEIGHT = 4;
 export default
 class Chunk {
     static WIDTH = 16;
-    static HEIGHT = 16;
+    static HEIGHT = 10;
     static LENGTH = 16;
-    static AREA = 16 * 16 * 16;
+    static AREA = Chunk.WIDTH * Chunk.HEIGHT * Chunk.LENGTH;
 
     static simplex = Simplex(0xdeadbeef);
 
     constructor(x, z, world) {
         this.x = x;
         this.z = z;
-        this.absX = x * Chunk.WIDTH;
-        this.absZ = z * Chunk.LENGTH;
         this.world = world;
 
-        this.model = new Mat4();
-        this.model.translate(x * Chunk.WIDTH, 0, z * Chunk.LENGTH);
-
+        this.absX = x * Chunk.WIDTH;
+        this.absZ = z * Chunk.LENGTH;
         this.data = new Uint8Array(Chunk.AREA).fill(Blocks.EMPTY);
+
+        // Meshes
         this.groundMesh = new Mesh();
         this.waterMesh = new Mesh();
 
+        this.groundMesh.model.translate(this.absX, 0, this.absZ);
+        this.waterMesh.model.translate(this.absX, -0.2, this.absZ);
+
         this.generateTerrain();
-        this.updateMeshs();
     }
 
     static index(x, y, z) {
@@ -42,6 +43,7 @@ class Chunk {
             return Blocks.EMPTY;
         }
 
+        // Check if the block is outside the chunk
         if (x < 0 || x >= Chunk.WIDTH || z < 0 || z >= Chunk.LENGTH) {
             return this.world.getBlock(this.absX + x, y, this.absZ + z);
         }
@@ -98,7 +100,7 @@ class Chunk {
                     if (block === Blocks.EMPTY) {
                         continue;
                     } else if (block === Blocks.WATER) {
-                        // this.waterMesh.blockFace("bottom", block, x, y, z);
+                        this.waterMesh.blockFace("top", block, x, y, z);
                         continue;
                     }
 

@@ -12,6 +12,10 @@ class World {
                 this.chunks.set(this.index(x, z), new Chunk(x, z, this));
             }
         }
+
+        for (const chunk of this.chunks.values()) {
+            chunk.updateMeshs();
+        }
     }
 
     index(x, z) {
@@ -22,25 +26,30 @@ class World {
         return this.chunks.get(this.index(x, z));
     }
 
+    // Returns a block from any chunk based on the global coordinates
     getBlock(x, y, z) {
-        const chunkX = Math.floor(x / Chunk.WIDTH);
-        const chunkZ = Math.floor(z / Chunk.LENGTH);
+        if (y >= Chunk.HEIGHT || y < 0) {
+            return Blocks.EMPTY;
+        }
 
-        const chunk = this.getChunk(chunkX, chunkZ);
+        const cx = Math.floor(x / Chunk.WIDTH);
+        const cz = Math.floor(z / Chunk.LENGTH);
+        const chunk = this.getChunk(cx, cz);
 
         if (!chunk) {
             return Blocks.EMPTY;
         }
 
-        return chunk.getBlock(x - chunkX * Chunk.WIDTH, y, z - chunkZ * Chunk.LENGTH);
+        return chunk.getBlock(x - cx * Chunk.WIDTH, y, z - cz * Chunk.LENGTH);
     }
 
     render(shader) {
         for (const chunk of this.chunks.values()) {
-            gl.useProgram(shader.id);
-            gl.uniformMatrix4fv(shader.getUniform("u_model"), false, chunk.model.data);
-
             chunk.groundMesh.render(shader);
+        }
+
+        for (const chunk of this.chunks.values()) {
+            chunk.waterMesh.render(shader);
         }
     }
 }

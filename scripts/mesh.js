@@ -7,6 +7,8 @@ class Mesh {
     constructor() {
         this.vbo = gl.createBuffer();
         this.ibo = gl.createBuffer();
+
+        this.model = new Mat4();
         
         this.vertices = [];
         this.indices = [];
@@ -62,6 +64,7 @@ class Mesh {
         gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, stride, 3 * byte);
         gl.vertexAttribPointer(aTexture, 2, gl.FLOAT, false, stride, 6 * byte);
 
+        gl.uniformMatrix4fv(shader.getUniform("u_model"), false, this.model.data);
         gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
     }
 
