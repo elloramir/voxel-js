@@ -90,6 +90,9 @@ class Chunk {
     }
 
     updateMeshs() {
+        this.groundMesh.unload();
+        this.waterMesh.unload();
+
         for (let x = 0; x < Chunk.WIDTH; x++) {
             for (let z = 0; z < Chunk.LENGTH; z++) {
                 for (let y = 0; y < Chunk.HEIGHT; y++) {

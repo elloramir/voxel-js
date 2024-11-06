@@ -37,7 +37,13 @@ class World {
         if (!this.getChunk(x, z)) {
             const chunk = new Chunk(x, z, this);
             this.chunks.set(this.index(x, z), chunk);
+
             chunk.updateMeshs();
+            
+            this.getChunk(x - 1, z)?.updateMeshs();
+            this.getChunk(x + 1, z)?.updateMeshs();
+            this.getChunk(x, z - 1)?.updateMeshs();
+            this.getChunk(x, z + 1)?.updateMeshs();
         }
     }
 

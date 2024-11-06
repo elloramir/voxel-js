@@ -44,6 +44,11 @@ class Mesh {
         this.indices = [];
     }
 
+    unload() {
+        this.numIndices = 0;
+        this.numVertices = 0;
+    }
+
     render(shader) {
         const aPosition = shader.getAttrib("a_position");
         const aNormal = shader.getAttrib("a_normal");

@@ -5,4 +5,8 @@ I made it just to pass time while i'm in a meeting 😛. This "game" does not us
 - [x] free view camera
 - [x] generate chunks
 - [x] world of chunks
-- [ ] optimize chunk borders
+- [x] optimize chunk borders
+- [ ] multi-threading chunk generation
+- [ ] load and save chunks to local database (sqlite)
+- [ ] frustum culling and frustum chunk generation
+
