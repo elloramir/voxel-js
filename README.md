@@ -1,4 +1,4 @@
-I made it just to pass time while i'm in a meeting 😛. This "game" does not uses external libraries (except for the Simplex Noise generator) and was made in near one day. There are a lot rooms for improvement, that I leave here, maybe in future i get return to it and make some tasks bellow
+I made this just to pass the time while I'm in a meeting 😛. This "game" does not use any external libraries (except for the Simplex Noise generator) and was made in nearly one day. There is a lot of room for improvement, which I’ll list here. Maybe in the future, I'll return to it and work on some of the tasks below.
 
 ### To be done
 - [x] basic framework core
