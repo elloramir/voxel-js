@@ -1,7 +1,5 @@
 import { mat4, vec3, vec2, common } from './math.js';
-
-const NEAR = 0.01;
-const FAR = 1000;
+import Frustum from './frustum.js';
 
 export default
 class Camera {
@@ -9,16 +7,23 @@ class Camera {
         this.viewMat = mat4.create();
         this.projMat = mat4.create();
 
+        this.near = 0.01;
+        this.far = 1000;
+
         this.position = vec3.fromValues(x, y, z);
         this.target = vec3.fromValues(0, 0, 0);
+        this.forward = vec3.fromValues(0, 0, 1);
         this.up = vec3.fromValues(0, 1, 0);
 
+        this.aspect = 0;
         this.fov = common.toRadian(60);
         this.yaw = common.toRadian(270);
         this.pitch = common.toRadian(-35);
 
         this.isDragging = false;
         this.mouseOffset = vec2.fromValues(0, 0);
+
+        this.frustum = new Frustum(this);
     }
 
     update() {
@@ -28,20 +33,22 @@ class Camera {
         const sinPitch = Math.sin(this.pitch);
     
         // Convert Euler angles to a target vector
-        const direction = vec3.fromValues(
+        this.forward = vec3.fromValues(
             cosPitch * cosYaw,
             sinPitch,
-            cosPitch * sinYaw
-        );
-    
+            cosPitch * sinYaw);
+
         // Where camera is looking
-        this.target = vec3.add(vec3.create(), this.position, direction);
-    
-        const aspect = window.canvas.width / window.canvas.height;
+        this.target = vec3.add(vec3.create(), this.position, this.forward);
+            
+        // Update the aspect ratio
+        this.aspect = window.canvas.width / window.canvas.height;
     
         // Recalculate the view and projection matrices
-        mat4.perspective(this.projMat, this.fov, aspect, NEAR, FAR);
+        mat4.perspective(this.projMat, this.fov, this.aspect, this.near, this.far);
         mat4.lookAt(this.viewMat, this.position, this.target, this.up);
+
+        this.frustum.updatePlanes();
     }
     
     relativeMouse(dx, dy) {

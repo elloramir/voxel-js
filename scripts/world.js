@@ -30,16 +30,16 @@ class World {
     }
 
     getBlockAt(x, j, z) {
-        const cx = Math.floor(x / Chunk.WIDTH);
-        const cz = Math.floor(z / Chunk.LENGTH);
+        const cx = Math.floor(x / Chunk.SIZE);
+        const cz = Math.floor(z / Chunk.SIZE);
         const chunk = this.getChunk(cx, cz);
 
         if (!chunk) {
             return Blocks.EMPTY;
         }
 
-        const i = x - cx * Chunk.WIDTH;
-        const k = z - cz * Chunk.LENGTH;
+        const i = x - cx * Chunk.SIZE;
+        const k = z - cz * Chunk.SIZE;
 
         return chunk.getBlock(i, j, k);
     }
@@ -59,20 +59,28 @@ class World {
     }
 
     *visibleChunks(camera) {
-        const cx = Math.floor(camera.position[0] / Chunk.WIDTH);
-        const cz = Math.floor(camera.position[2] / Chunk.LENGTH);
+        const cx = Math.floor(camera.position[0] / Chunk.SIZE);
+        const cz = Math.floor(camera.position[2] / Chunk.SIZE);
 
+        let total = 0;
+        let passes = 0;
         for (let i = cx - 3; i < cx + 3; i++) {
             for (let k = cz - 3; k < cz + 3; k++) {
+                total++;
                 const chunk = this.getChunk(i, k);
 
                 if (chunk) {
-                    yield chunk;
+                    if (camera.frustum.isChunkInside(chunk)) {
+                        passes++;
+                        yield chunk;
+                    }
                 } else {
                     this.generateChunk(i, k);
                 }
             }
         }
+
+        console.log(`Visible chunks: ${passes}/${total}`);
     }
 
     render(shader, camera) {
