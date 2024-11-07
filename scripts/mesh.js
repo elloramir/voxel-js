@@ -68,7 +68,7 @@ class Mesh {
         gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, stride, 3 * byte);
         gl.vertexAttribPointer(aTexture, 2, gl.FLOAT, false, stride, 6 * byte);
 
-        gl.uniformMatrix4fv(shader.getUniform("u_model"), false, this.model);
+        gl.uniformMatrix4fv(shader.getUniform("modelMatrix"), false, this.model);
         gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
     }
 

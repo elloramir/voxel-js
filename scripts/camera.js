@@ -6,6 +6,7 @@ class Camera {
     constructor(x, y, z) {
         this.viewMat = mat4.create();
         this.projMat = mat4.create();
+        this.viewProjMat = mat4.create();
 
         this.near = 0.01;
         this.far = 1000;
@@ -16,7 +17,7 @@ class Camera {
         this.up = vec3.fromValues(0, 1, 0);
 
         this.aspect = 0;
-        this.fov = common.toRadian(60);
+        this.fov = common.toRadian(45);
         this.yaw = common.toRadian(270);
         this.pitch = common.toRadian(-35);
 
@@ -47,6 +48,7 @@ class Camera {
         // Recalculate the view and projection matrices
         mat4.perspective(this.projMat, this.fov, this.aspect, this.near, this.far);
         mat4.lookAt(this.viewMat, this.position, this.target, this.up);
+        mat4.multiply(this.viewProjMat, this.projMat, this.viewMat);
 
         this.frustum.updatePlanes();
     }
@@ -101,7 +103,8 @@ class Camera {
 
     bind(shader) {
         gl.useProgram(shader.id);
-        gl.uniformMatrix4fv(shader.getUniform("u_view"), false, this.viewMat);
-        gl.uniformMatrix4fv(shader.getUniform("u_proj"), false, this.projMat);
+        // gl.uniformMatrix4fv(shader.getUniform("u_viewproj"), false, this.viewProjMat);
+        gl.uniformMatrix4fv(shader.getUniform("viewMatrix"), false, this.viewMat);
+        gl.uniformMatrix4fv(shader.getUniform("projectionMatrix"), false, this.projMat);
     }
 }

@@ -1,22 +1,22 @@
 precision mediump float;
 
-varying vec2 v_texcoords;
-varying vec3 v_normal;
-varying vec3 v_position;
+varying vec4 worldPosition;
+varying vec4 viewPosition;
+varying vec4 screenPosition;
+varying vec2 texcoords;
+varying vec3 normal;
 
-uniform sampler2D u_texture;
+uniform sampler2D texture;
 
 void main() {
-    vec2 uv = vec2(v_texcoords.x, v_texcoords.y);
-    vec4 color = texture2D(u_texture, uv);
+    vec4 color = texture2D(texture, texcoords);
 
-    // simple lighting coming from (0, 1, 0)
-    vec3 light = normalize(vec3(0, 1, 0));
-    const float ambient = 0.6;
-    const float diffuse = 0.4;
+    float fogDensity = 0.005;
+	float dist = length(viewPosition - screenPosition);
+	vec4 fogColor = vec4(0.3, 0.6, 0.9, 1.0);
+    float fogFactor = 1.0 / exp((dist * fogDensity) * (dist * fogDensity));
+    fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
 
-    float intensity = max(dot(v_normal, light), 0.0) * diffuse + ambient;
-    color.rgb *= intensity;
-    
-    gl_FragColor = color;
+
+    gl_FragColor = mix(color, fogColor, fogFactor);
 }

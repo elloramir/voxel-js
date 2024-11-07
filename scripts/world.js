@@ -62,7 +62,7 @@ class World {
     visibleChunks(camera) {
         const cx = Math.floor(camera.position[0] / Chunk.SIZE);
         const cz = Math.floor(camera.position[2] / Chunk.SIZE);
-        const viewDist = 6;
+        const viewDist = 10;
         const viewSqrDist = viewDist * viewDist * Chunk.SIZE * Chunk.SIZE;
 
         const visibleChunks = [];
@@ -95,8 +95,8 @@ class World {
             chunk.groundMesh.render(shader);
         }
 
-        for (const chunk of visibleChunks) {
-            chunk.waterMesh.render(shader);
-        }
+        // for (const chunk of visibleChunks) {
+        //     chunk.waterMesh.render(shader);
+        // }
     }
 }
