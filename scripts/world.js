@@ -58,21 +58,26 @@ class World {
         }
     }
 
-    *visibleChunks(camera) {
+    // Returns the chunks that are visible by the camera
+    visibleChunks(camera) {
         const cx = Math.floor(camera.position[0] / Chunk.SIZE);
         const cz = Math.floor(camera.position[2] / Chunk.SIZE);
+        const viewDist = 6;
+        const viewSqrDist = viewDist * viewDist * Chunk.SIZE * Chunk.SIZE;
 
-        let total = 0;
-        let passes = 0;
-        for (let i = cx - 3; i < cx + 3; i++) {
-            for (let k = cz - 3; k < cz + 3; k++) {
-                total++;
+        const visibleChunks = [];
+        for (let i = cx - viewDist; i < cx + viewDist; i++) {
+            for (let k = cz - viewDist; k < cz + viewDist; k++) {
                 const chunk = this.getChunk(i, k);
 
                 if (chunk) {
-                    if (camera.frustum.isChunkInside(chunk)) {
-                        passes++;
-                        yield chunk;
+                    const distX = chunk.centerX - camera.position[0];
+                    const distZ = chunk.centerZ - camera.position[2];
+                    const chunkSqrDist = distX * distX + distZ * distZ;
+                    const isOnView = chunkSqrDist < viewSqrDist;
+
+                    if (isOnView && camera.frustum.isChunkInside(chunk)) {
+                        visibleChunks.push(chunk);
                     }
                 } else {
                     this.generateChunk(i, k);
@@ -80,15 +85,17 @@ class World {
             }
         }
 
-        console.log(`Visible chunks: ${passes}/${total}`);
+        return visibleChunks;
     }
 
     render(shader, camera) {
-        for (const chunk of this.visibleChunks(camera)) {
+        const visibleChunks = this.visibleChunks(camera);
+
+        for (const chunk of visibleChunks) {
             chunk.groundMesh.render(shader);
         }
 
-        for (const chunk of this.visibleChunks(camera)) {
+        for (const chunk of visibleChunks) {
             chunk.waterMesh.render(shader);
         }
     }
