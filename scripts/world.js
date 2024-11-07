@@ -59,8 +59,8 @@ class World {
     }
 
     *visibleChunks(camera) {
-        const cx = Math.floor(camera.position.x / Chunk.WIDTH);
-        const cz = Math.floor(camera.position.z / Chunk.LENGTH);
+        const cx = Math.floor(camera.position[0] / Chunk.WIDTH);
+        const cz = Math.floor(camera.position[2] / Chunk.LENGTH);
 
         for (let i = cx - 3; i < cx + 3; i++) {
             for (let k = cz - 3; k < cz + 3; k++) {
@@ -74,7 +74,6 @@ class World {
             }
         }
     }
-
 
     render(shader, camera) {
         for (const chunk of this.visibleChunks(camera)) {

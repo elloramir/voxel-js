@@ -1,11 +1,9 @@
-import { Vec2 } from "./math.js";
-
 export default
 class Input {
     constructor() {
         this.keyStates = new Map();
         this.buttonStates = new Map();
-        this.mouse = new Vec2(0, 0);
+        this.mouse = { x: 0, y: 0 };
 
         window.addEventListener("keydown", (e) => this.keyStates.set(e.key.toLowerCase(), true));
         window.addEventListener("keyup", (e) => this.keyStates.set(e.key.toLowerCase(), false));

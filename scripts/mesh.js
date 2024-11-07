@@ -1,4 +1,4 @@
-import { Mat4 } from "./math.js";
+import { mat4 } from "./math.js";
 import Blocks from "./blocks.js";
 
 export default
@@ -7,8 +7,7 @@ class Mesh {
         this.vbo = gl.createBuffer();
         this.ibo = gl.createBuffer();
 
-        this.model = new Mat4();
-        this.model.identity();
+        this.model = mat4.identity(mat4.create());
         
         this.vertices = [];
         this.indices = [];
@@ -69,7 +68,7 @@ class Mesh {
         gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, stride, 3 * byte);
         gl.vertexAttribPointer(aTexture, 2, gl.FLOAT, false, stride, 6 * byte);
 
-        gl.uniformMatrix4fv(shader.getUniform("u_model"), false, this.model.data);
+        gl.uniformMatrix4fv(shader.getUniform("u_model"), false, this.model);
         gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
     }
 

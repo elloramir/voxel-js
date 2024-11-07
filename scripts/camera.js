@@ -1,4 +1,4 @@
-import { Mat4, Vec3, Vec2, degToRad } from './math.js';
+import { mat4, vec3, vec2, common } from './math.js';
 
 const NEAR = 0.01;
 const FAR = 1000;
@@ -6,19 +6,19 @@ const FAR = 1000;
 export default
 class Camera {
     constructor(x, y, z) {
-        this.viewMat = new Mat4();
-        this.projMat = new Mat4();
+        this.viewMat = mat4.create();
+        this.projMat = mat4.create();
 
-        this.position = new Vec3(x, y, z);
-        this.target = new Vec3(0, 0, 0);
-        this.up = new Vec3(0, 1, 0);
+        this.position = vec3.fromValues(x, y, z);
+        this.target = vec3.fromValues(0, 0, 0);
+        this.up = vec3.fromValues(0, 1, 0);
 
-        this.fov = degToRad(60);
-        this.yaw = degToRad(270);
-        this.pitch = degToRad(-35);
+        this.fov = common.toRadian(60);
+        this.yaw = common.toRadian(270);
+        this.pitch = common.toRadian(-35);
 
         this.isDragging = false;
-        this.mouseOffset = new Vec2(0, 0);
+        this.mouseOffset = vec2.fromValues(0, 0);
     }
 
     update() {
@@ -28,24 +28,20 @@ class Camera {
         const sinPitch = Math.sin(this.pitch);
     
         // Convert Euler angles to a target vector
-        const direction = new Vec3(
+        const direction = vec3.fromValues(
             cosPitch * cosYaw,
             sinPitch,
             cosPitch * sinYaw
         );
     
         // Where camera is looking
-        this.target = new Vec3(
-            this.position.x + direction.x,
-            this.position.y + direction.y,
-            this.position.z + direction.z
-        );
+        this.target = vec3.add(vec3.create(), this.position, direction);
     
         const aspect = window.canvas.width / window.canvas.height;
     
         // Recalculate the view and projection matrices
-        this.projMat.perspective(this.fov, aspect, NEAR, FAR);
-        this.viewMat.lookAt(this.position, this.target, this.up);
+        mat4.perspective(this.projMat, this.fov, aspect, NEAR, FAR);
+        mat4.lookAt(this.viewMat, this.position, this.target, this.up);
     }
     
     relativeMouse(dx, dy) {
@@ -59,8 +55,8 @@ class Camera {
         if (spdx !== 0 || spdy !== 0) {
             const angle = Math.atan2(spdx, spdy);
 
-            this.position.x += Math.sin(this.yaw + angle) * 0.3;
-            this.position.z -= Math.cos(this.yaw + angle) * 0.3;
+            this.position[0] += Math.sin(this.yaw + angle) * 0.3;
+            this.position[2] -= Math.cos(this.yaw + angle) * 0.3;
         }
     }
 
@@ -89,16 +85,16 @@ class Camera {
 
         // up and down
         if (input.isKeyDown(" ")) {
-            this.position.y += 0.3;
+            this.position[1] += 0.3;
         }
         if (input.isKeyDown("shift")) {
-            this.position.y -= 0.3;
+            this.position[1] -= 0.3;
         }
     }
 
     bind(shader) {
         gl.useProgram(shader.id);
-        gl.uniformMatrix4fv(shader.getUniform("u_view"), false, this.viewMat.data);
-        gl.uniformMatrix4fv(shader.getUniform("u_proj"), false, this.projMat.data);
+        gl.uniformMatrix4fv(shader.getUniform("u_view"), false, this.viewMat);
+        gl.uniformMatrix4fv(shader.getUniform("u_proj"), false, this.projMat);
     }
 }

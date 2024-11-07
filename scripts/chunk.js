@@ -1,7 +1,7 @@
 import Mesh from './mesh.js';
 import Simplex from "./simplex.js";
 import Blocks from './blocks.js';
-import { Mat4 } from './math.js';
+import { mat4 } from './math.js';
 
 const NOISE_SMOOTHNESS = 20;
 const WATER_HEIGHT = 4;
@@ -28,8 +28,8 @@ class Chunk {
         this.groundMesh = new Mesh();
         this.waterMesh = new Mesh();
 
-        this.groundMesh.model.translate(this.absX, 0, this.absZ);
-        this.waterMesh.model.translate(this.absX, -0.2, this.absZ);
+        mat4.translate(this.groundMesh.model, this.groundMesh.model, [this.absX, 0, this.absZ]);
+        mat4.translate(this.waterMesh.model, this.waterMesh.model, [this.absX, -0.2, this.absZ]);
 
         this.generateTerrain();
     }
