@@ -10,7 +10,11 @@ export default class Frustum {
     }
 
     updatePlanes() {
-        const m = mat4.multiply(mat4.create(), this.camera.projMat, this.camera.viewMat);
+        // for debugging
+        // this.camera.fov -= 0.3;
+        // this.camera.update();
+        // this.camera.fov += 0.3;
+        const m = this.camera.viewProjMat;
 
         this.planes = [
             vec4.fromValues(m[3] - m[0], m[7] - m[4], m[11] - m[8],  m[15] - m[12]), // Right
@@ -33,27 +37,31 @@ export default class Frustum {
         const z0 = chunk.absZ;
         const z1 = chunk.absZ + Chunk.SIZE;
         const y0 = 0;
-        const y1 = Chunk.HEIGHT;
-
-        if (
-            this.isPointInside(x0, y0, z0) ||
-            this.isPointInside(x1, y0, z0) ||
-            this.isPointInside(x0, y0, z1) ||
-            this.isPointInside(x1, y0, z1) ||
-            this.isPointInside(x0, y1, z0) ||
-            this.isPointInside(x1, y1, z0) ||
-            this.isPointInside(x0, y1, z1) ||
-            this.isPointInside(x1, y1, z1)
-        ) {
-            return true;
-        }
-
-        return false;
+        const y1 = Chunk.SIZE;
+        
+        return this.isAABBInside(x0, y0, z0, x1, y1, z1);
     }
 
     isPointInside(x, y, z) {
         for (const plane of this.planes) {
             if (plane[0] * x + plane[1] * y + plane[2] * z + plane[3] <= 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    isAABBInside(x0, y0, z0, x1, y1, z1) {
+        for (const plane of this.planes) {
+            if (plane[0] * x0 + plane[1] * y0 + plane[2] * z0 + plane[3] <= 0 &&
+                plane[0] * x1 + plane[1] * y0 + plane[2] * z0 + plane[3] <= 0 &&
+                plane[0] * x0 + plane[1] * y1 + plane[2] * z0 + plane[3] <= 0 &&
+                plane[0] * x1 + plane[1] * y1 + plane[2] * z0 + plane[3] <= 0 &&
+                plane[0] * x0 + plane[1] * y0 + plane[2] * z1 + plane[3] <= 0 &&
+                plane[0] * x1 + plane[1] * y0 + plane[2] * z1 + plane[3] <= 0 &&
+                plane[0] * x0 + plane[1] * y1 + plane[2] * z1 + plane[3] <= 0 &&
+                plane[0] * x1 + plane[1] * y1 + plane[2] * z1 + plane[3] <= 0) {
                 return false;
             }
         }

@@ -49,8 +49,6 @@ class Camera {
         mat4.perspective(this.projMat, this.fov, this.aspect, this.near, this.far);
         mat4.lookAt(this.viewMat, this.position, this.target, this.up);
         mat4.multiply(this.viewProjMat, this.projMat, this.viewMat);
-
-        this.frustum.updatePlanes();
     }
     
     relativeMouse(dx, dy) {
@@ -99,6 +97,8 @@ class Camera {
         if (input.isKeyDown("shift")) {
             this.position[1] -= 0.3;
         }
+
+        this.frustum.updatePlanes();
     }
 
     bind(shader) {
