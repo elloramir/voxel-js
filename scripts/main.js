@@ -47,7 +47,8 @@ window.onload = async function() {
 
         camera.updateFreeView(input);
         camera.update();
-        camera.bind(shader);
+
+        camera.bind(terrainShader);
         camera.bind(waterShader);
 
         world.render(terrainShader, waterShader, camera);
