@@ -1,6 +1,7 @@
 import Mesh from './mesh.js';
 import Simplex from "./simplex.js";
 import Blocks from './blocks.js';
+import Texture from './texture.js';
 import { mat4, vec4 } from './math.js';
 
 const NOISE_SMOOTHNESS = 20;
@@ -33,6 +34,7 @@ class Chunk {
         this.centerX = this.absX + Chunk.SIZE / 2;
         this.centerZ = this.absZ + Chunk.SIZE / 2;
         this.data = new Uint8Array(Chunk.AREA).fill(Blocks.EMPTY);
+        this.depthTexture = null;
 
         // Meshes
         this.groundMesh = new Mesh();
@@ -74,6 +76,8 @@ class Chunk {
     }
 
     generateTerrain() {
+        const depthData = [];
+
         for (let x = 0; x < Chunk.SIZE; x++) {
             for (let z = 0; z < Chunk.SIZE; z++) {
                 const noiseX = (this.absX + x) / NOISE_SMOOTHNESS;
@@ -95,8 +99,14 @@ class Chunk {
                 if (this.getBlock(x, WATER_HEIGHT, z) === Blocks.EMPTY) {
                     this.data[Chunk.index(x, WATER_HEIGHT, z)] = Blocks.WATER;
                 }
+
+                // Set depth data pixel
+                const depth = Math.floor(value * 255);
+                depthData.push(depth, depth, depth, 255); 
             }
         }
+
+        this.depthTexture = Texture.fromUint8Array(depthData, Chunk.SIZE, Chunk.SIZE);
     }
 
     updateMeshs() {

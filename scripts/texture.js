@@ -30,6 +30,15 @@ class Texture {
 			img.src = file;
 		});
 	}
+
+	static fromUint8Array(data, width, height) {
+		const img = new ImageData(
+			new Uint8ClampedArray(data),
+			width,
+			height);
+
+		return new Texture(img);
+	}
 };
 
 function isPowerOf2(value) {

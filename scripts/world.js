@@ -98,15 +98,22 @@ class World {
         return visibleChunks;
     }
 
-    render(shader, camera) {
+    render(terrainShader, waterShader, camera) {
         const visibleChunks = this.visibleChunks(camera);
+        const texture = Blocks.atlas.id;
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
 
         for (const chunk of visibleChunks) {
-            chunk.groundMesh.render(shader);
+            chunk.groundMesh.render(terrainShader);
         }
 
-        // for (const chunk of visibleChunks) {
-        //     chunk.waterMesh.render(shader);
-        // }
+        for (const chunk of visibleChunks) {
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, chunk.depthTexture.id);
+
+            chunk.waterMesh.render(waterShader);
+        }
     }
 }

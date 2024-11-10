@@ -16,10 +16,16 @@ window.onload = async function() {
     const camera = new Camera(0, 20, 10);
     const input = new Input();
 
-    const shader = await Shader.loadFromFile(
+    const terrainShader = await Shader.loadFromFile(
         "assets/basic.vert",
         "assets/basic.frag"
     );
+
+    const waterShader = await Shader.loadFromFile(
+        "assets/basic.vert",
+        "assets/water.frag"
+    );
+
 
     Blocks.atlas = await Texture.loadFromFile("assets/atlas.png");
     Blocks.add(Blocks.GRASS, 2, 1, 0);
@@ -38,14 +44,13 @@ window.onload = async function() {
     function render(time) {
         gl.clearColor(0.2, 0.5, 0.8, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, Blocks.atlas.id);
 
         camera.updateFreeView(input);
         camera.update();
         camera.bind(shader);
+        camera.bind(waterShader);
 
-        world.render(shader, camera);
+        world.render(terrainShader, waterShader, camera);
 
         requestAnimationFrame(render);
     }

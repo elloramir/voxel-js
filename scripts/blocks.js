@@ -24,12 +24,9 @@ class Blocks {
         const u0 = x / cols + tinyX;
         const u1 = (x + 1) / cols - tinyX;
 
-        let v0 = y / rows + tinyY;
-        let v1 = (y + 1) / rows - tinyY;
-
         // Flip the texture vertically
-        v0 = (y + 1) / rows - tinyY;
-        v1 = y / rows + tinyY;
+        const v0 = (y + 1) / rows - tinyY;
+        const v1 = y / rows + tinyY;
 
         return [u0, v0, u1, v1];
     }
