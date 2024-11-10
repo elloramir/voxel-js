@@ -6,7 +6,7 @@ I made this just to pass the time while I'm in a meeting 😛. This "game" does 
 - [x] generate chunks
 - [x] world of chunks
 - [x] optimize chunk borders
+- [x] frustum culling and frustum chunk generation
 - [ ] multi-threading chunk generation
 - [ ] load and save chunks to local database (sqlite)
-- [ ] frustum culling and frustum chunk generation
 
