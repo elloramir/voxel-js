@@ -1,7 +1,7 @@
 import Mesh from './mesh.js';
 import Simplex from "./simplex.js";
 import Blocks from './blocks.js';
-import { mat4 } from './math.js';
+import { mat4, vec4 } from './math.js';
 
 const NOISE_SMOOTHNESS = 20;
 const WATER_HEIGHT = 4;
@@ -103,7 +103,7 @@ class Chunk {
                     if (block === Blocks.EMPTY) {
                         continue;
                     } else if (block === Blocks.WATER) {
-                        // this.waterMesh.blockFace("top", block, x, y, z, [0.75, 0.75, 0.75, 0.75]);
+                        this.waterMesh.blockFace("top", block, x, y, z, vec4.zero);
                         continue;
                     }
 
@@ -134,7 +134,7 @@ class Chunk {
         this.waterMesh.upload();
     }
 
-    // @todo: refactor this function and bring a better solution for AO calculation
+    // @todo: Refactor this function and bring a better solution for AO calculation
     calculateAO(face, x, y, z) {
         const ao = [];
 
@@ -181,8 +181,6 @@ class Chunk {
     }
 }
 
-
-// 0 is full shadow, 1 is full light
 function aoLevel(side1, side2, corner) {
     if (side1 && side2) return 0.0;
     

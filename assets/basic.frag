@@ -24,7 +24,6 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, normalDir);
 
     float diff = max(dot(normalDir, lightDir), 0.0);
-
     float light = ambient + diffuse * diff + 0.3;
     pixel *= vec4(light, light, light, 1.0) * sunColor;
 

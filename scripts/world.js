@@ -5,20 +5,7 @@ export default
 class World {
     constructor() {
         this.chunks = new Map();
-
-        // Intialized the map
-        for (let i = -1; i < 2; i++) {
-            for (let k = -1; k < 2; k++) {
-                const chunk = new Chunk(i, k, this);
-                this.chunks.set(this.index(i, k), chunk);
-            }
-        }
-
-        // As we don't have any chunk generated yet, we can
-        // update all the chunks mesh at once (wich is faster).
-        for (const chunk of this.chunks.values()) {
-            chunk.updateMeshs();
-        }
+        this.lastTimeChunkGenerated = 0;
     }
 
     index(i, k) {
@@ -58,6 +45,16 @@ class World {
         }
     }
 
+    tryGenerateChunk(i, k) {
+        const delta = Date.now() - this.lastTimeChunkGenerated;
+        const timeGap = 30; // time in ms to enable chunk generation
+
+        if (delta > timeGap) {
+            this.generateChunk(i, k);
+            this.lastTimeChunkGenerated = Date.now();
+        }
+    }
+
     // Returns the chunks that are visible by the camera
     visibleChunks(camera) {
         const cx = Math.floor(camera.position[0] / Chunk.SIZE);
@@ -69,19 +66,31 @@ class World {
         const visibleChunks = [];
         for (let i = cx - halfViewDist; i < cx + halfViewDist; i++) {
             for (let k = cz - halfViewDist; k < cz + halfViewDist; k++) {
-                const chunk = this.getChunk(i, k);
+                // Chunk bounds
+                const x0 = i * Chunk.SIZE;
+                const z0 = k * Chunk.SIZE;
+                const x1 = x0 + Chunk.SIZE;
+                const z1 = z0 + Chunk.SIZE;
+                const y0 = 0;
+                const y1 = Chunk.HEIGHT;
 
-                if (chunk) {
-                    const distX = chunk.centerX - camera.position[0];
-                    const distZ = chunk.centerZ - camera.position[2];
-                    const chunkSqrDist = distX * distX + distZ * distZ;
-                    const isOnView = chunkSqrDist < viewSqrDist;
+                // Chunk distance to the camera
+                const distX = (x0 + Chunk.SIZE / 2) - camera.position[0];
+                const distZ = (z0 + Chunk.SIZE / 2) - camera.position[2];
+                const chunkSqrDist = distX * distX + distZ * distZ;
+                const isOnView = chunkSqrDist < viewSqrDist;
 
-                    if (isOnView && camera.frustum.isChunkInside(chunk)) {
-                        visibleChunks.push(chunk);
+                if (isOnView) {
+                    // Let's only append or generate the chunk if it's inside the camera frustum
+                    if (camera.frustum.isAABBInside(x0, y0, z0, x1, y1, z1)) {
+                        const chunk = this.getChunk(i, k);
+                        
+                        if (chunk) {
+                            visibleChunks.push(chunk);
+                        } else {
+                            this.tryGenerateChunk(i, k);
+                        }
                     }
-                } else {
-                    this.generateChunk(i, k);
                 }
             }
         }

@@ -34,7 +34,8 @@ window.onload = async function() {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    function render() {
+
+    function render(time) {
         gl.clearColor(0.2, 0.5, 0.8, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.activeTexture(gl.TEXTURE0);

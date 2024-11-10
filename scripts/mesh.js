@@ -89,48 +89,53 @@ class Mesh {
         const [u0, v0, u1, v1] = Blocks.blocks.get(block)[dir];
 
         switch(face) {
-        case "north":
-            this.vertex(xp, yp, zn, 0, 0, -1, u1, v1, ao[0]);
-            this.vertex(xp, yn, zn, 0, 0, -1, u1, v0, ao[1]);
-            this.vertex(xn, yn, zn, 0, 0, -1, u0, v0, ao[2]);
-            this.vertex(xn, yp, zn, 0, 0, -1, u0, v1, ao[3]);
-            this.lastQuad(0, 1, 2, 0, 2, 3);
-        break;
-        case "south":
-            this.vertex(xn, yp, zp, 0, 0, 1, u0, v1, ao[0]);
-            this.vertex(xn, yn, zp, 0, 0, 1, u0, v0, ao[1]);
-            this.vertex(xp, yn, zp, 0, 0, 1, u1, v0, ao[2]);
-            this.vertex(xp, yp, zp, 0, 0, 1, u1, v1, ao[3]);
-            this.lastQuad(0, 1, 2, 0, 2, 3);
-        break;
-        case "east":
-            this.vertex(xp, yp, zn, 1, 0, 0, u1, v1, ao[0]);
-            this.vertex(xp, yn, zp, 1, 0, 0, u0, v0, ao[1]);
-            this.vertex(xp, yn, zn, 1, 0, 0, u1, v0, ao[2]);
-            this.vertex(xp, yp, zp, 1, 0, 0, u0, v1, ao[3]);
-            this.lastQuad(0, 1, 2, 3, 1, 0);
-        break;
-        case "west":
-            this.vertex(xn, yp, zn, -1, 0, 0, u0, v1, ao[0]);
-            this.vertex(xn, yn, zn, -1, 0, 0, u0, v0, ao[1]);
-            this.vertex(xn, yn, zp, -1, 0, 0, u1, v0, ao[2]);
-            this.vertex(xn, yp, zp, -1, 0, 0, u1, v1, ao[3]);
-            this.lastQuad(0, 1, 2, 3, 0, 2);
-        break;
-        case "top":
-            this.vertex(xn, yp, zp, 0, 1, 0, u0, v0, ao[0]);
-            this.vertex(xp, yp, zp, 0, 1, 0, u1, v0, ao[1]);
-            this.vertex(xn, yp, zn, 0, 1, 0, u0, v1, ao[2]);
-            this.vertex(xp, yp, zn, 0, 1, 0, u1, v1, ao[3]);
-            this.lastQuad(0, 1, 2, 2, 1, 3);
-        break;
-        case "bottom":
-            this.vertex(xn, yn, zp, 0, -1, 0, u0, v1, ao[0]);
-            this.vertex(xn, yn, zn, 0, -1, 0, u0, v0, ao[1]);
-            this.vertex(xp, yn, zp, 0, -1, 0, u1, v1, ao[2]);
-            this.vertex(xp, yn, zn, 0, -1, 0, u1, v0, ao[3]);
-            this.lastQuad(0, 1, 2, 1, 3, 2);
-        break;
+            case "north":
+                this.vertex(xp, yp, zn, 0, 0, -1, u1, v1, ao[0]);
+                this.vertex(xp, yn, zn, 0, 0, -1, u1, v0, ao[1]);
+                this.vertex(xn, yn, zn, 0, 0, -1, u0, v0, ao[2]);
+                this.vertex(xn, yp, zn, 0, 0, -1, u0, v1, ao[3]);
+                this.lastQuad(0, 1, 2, 0, 2, 3);
+            break;
+            case "south":
+                this.vertex(xn, yp, zp, 0, 0, 1, u0, v1, ao[0]);
+                this.vertex(xn, yn, zp, 0, 0, 1, u0, v0, ao[1]);
+                this.vertex(xp, yn, zp, 0, 0, 1, u1, v0, ao[2]);
+                this.vertex(xp, yp, zp, 0, 0, 1, u1, v1, ao[3]);
+                this.lastQuad(0, 1, 2, 0, 2, 3);
+            break;
+            case "east":
+                this.vertex(xp, yp, zn, 1, 0, 0, u1, v1, ao[0]);
+                this.vertex(xp, yn, zp, 1, 0, 0, u0, v0, ao[1]);
+                this.vertex(xp, yn, zn, 1, 0, 0, u1, v0, ao[2]);
+                this.vertex(xp, yp, zp, 1, 0, 0, u0, v1, ao[3]);
+                this.lastQuad(0, 1, 2, 3, 1, 0);
+            break;
+            case "west":
+                this.vertex(xn, yp, zn, -1, 0, 0, u0, v1, ao[0]);
+                this.vertex(xn, yn, zn, -1, 0, 0, u0, v0, ao[1]);
+                this.vertex(xn, yn, zp, -1, 0, 0, u1, v0, ao[2]);
+                this.vertex(xn, yp, zp, -1, 0, 0, u1, v1, ao[3]);
+                this.lastQuad(0, 1, 2, 3, 0, 2);
+            break;
+            case "top":
+                this.vertex(xn, yp, zp, 0, 1, 0, u0, v0, ao[0]);
+                this.vertex(xp, yp, zp, 0, 1, 0, u1, v0, ao[1]);
+                this.vertex(xn, yp, zn, 0, 1, 0, u0, v1, ao[2]);
+                this.vertex(xp, yp, zn, 0, 1, 0, u1, v1, ao[3]);
+                this.lastQuad(0, 1, 2, 2, 1, 3);
+            break;
+            case "bottom":
+                this.vertex(xn, yn, zp, 0, -1, 0, u0, v1, ao[0]);
+                this.vertex(xn, yn, zn, 0, -1, 0, u0, v0, ao[1]);
+                this.vertex(xp, yn, zp, 0, -1, 0, u1, v1, ao[2]);
+                this.vertex(xp, yn, zn, 0, -1, 0, u1, v0, ao[3]);
+                this.lastQuad(0, 1, 2, 1, 3, 2);
+            break;
         }
     }
 }
+
+// @todo: Flip quads
+// function shouldFlip(ao) {
+//     return ao[0] + ao[2] > ao[1] + ao[3];
+// }
