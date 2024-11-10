@@ -5,31 +5,43 @@ varying vec4 viewPosition;
 varying vec4 screenPosition;
 varying vec2 texcoords;
 varying vec3 normal;
+varying float ao;
 
 uniform sampler2D texture;
 
-void main() {
-    vec4 color = texture2D(texture, texcoords);
+const vec4 sunColor = vec4(1.0, 0.6, 0.3, 1.0);
 
-    float fogDensity = 0.005;
-	float dist = length(viewPosition - screenPosition);
-	vec4 fogColor = vec4(0.3, 0.6, 0.9, 1.0);
-    float fogFactor = 1.0 / exp((dist * fogDensity) * (dist * fogDensity));
-    fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
+void main() {
+    vec4 pixel = texture2D(texture, texcoords);
+
+    // float fogDensity = 0.005;
+	// float dist = length(viewPosition - screenPosition);
+	// vec4 fogColor = vec4(0.3, 0.6, 0.9, 1.0);
+    // float fogFactor = 1.0 / exp((dist * fogDensity) * (dist * fogDensity));
+    // fogFactor = 1.0 - clamp(fogFactor, 0.0, 1.0);
 
     // sun light
-    vec3 sunPosition = vec3(0.0, 200.0, 0.0);
-    const float ambient = 0.3;
-    const float diffuse = 0.8;
-    vec3 lightDir = normalize(sunPosition - worldPosition.xyz);
-    float intensity = max(dot(normal, lightDir), 0.0) * diffuse + ambient;
-    // color.rgb *= intensity;
-    vec3 sunColor = vec3(1.0, 0.9, 0.6);
-    vec3 ambientColor = vec3(0.2, 0.2, 0.2);
-    vec3 diffuseColor = vec3(0.8, 0.8, 0.8);
-    vec3 lightColor = ambientColor + diffuseColor * intensity;
-    color.rgb *= lightColor;
+    const float ambient = 0.4;
+    const float diffuse = 0.9;
+    const float specular = 0.3;
+    // const float shininess = 0.00;
+
+    vec3 lightDir = normalize(vec3(0.5, 0.5, 0.5));
+    vec3 normalDir = normalize(normal);
+    vec3 viewDir = normalize(-viewPosition.xyz);
+    vec3 reflectDir = reflect(-lightDir, normalDir);
+
+    float diff = max(dot(normalDir, lightDir), 0.0);
+    float spec = 1.0;
+
+    float light = ambient + diffuse * diff + specular * spec;
+    pixel *= vec4(light, light, light, 1.0) * sunColor;
 
 
-    gl_FragColor = mix(color, fogColor, fogFactor);
+    // ambient occlusion
+    const float aoStrength = 0.23;
+    pixel.rgb *= (1.0 - ao * aoStrength);
+ 
+
+    gl_FragColor = pixel;
 }

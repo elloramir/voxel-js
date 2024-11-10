@@ -16,8 +16,8 @@ class Mesh {
         this.numVertices = 0;
     }
 
-    vertex(x, y, z, n1, n2, n3, u, v) {
-        this.vertices.push(x, y, z, n1, n2, n3, u, v);
+    vertex(x, y, z, n1, n2, n3, u, v, ao) {
+        this.vertices.push(x, y, z, n1, n2, n3, u, v, ao);
         this.numVertices++;
     }
 
@@ -52,6 +52,7 @@ class Mesh {
         const aPosition = shader.getAttrib("a_position");
         const aNormal = shader.getAttrib("a_normal");
         const aTexture = shader.getAttrib("a_texcoords");
+        const aAo = shader.getAttrib("a_ao");
 
         gl.useProgram(shader.id);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
@@ -60,13 +61,15 @@ class Mesh {
         gl.enableVertexAttribArray(aPosition);
         gl.enableVertexAttribArray(aNormal);
         gl.enableVertexAttribArray(aTexture);
+        gl.enableVertexAttribArray(aAo);
 
         const byte = Float32Array.BYTES_PER_ELEMENT;
-        const stride = 8 * byte;
+        const stride = 9 * byte;
 
         gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, stride, 0);
         gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, stride, 3 * byte);
         gl.vertexAttribPointer(aTexture, 2, gl.FLOAT, false, stride, 6 * byte);
+        gl.vertexAttribPointer(aAo, 1, gl.FLOAT, false, stride, 8 * byte);
 
         gl.uniformMatrix4fv(shader.getUniform("modelMatrix"), false, this.model);
         gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
@@ -74,7 +77,7 @@ class Mesh {
 
     // As you can see, this class is not generic at all and
     // are made exclusively for the game's needs.
-    blockFace(face, block, i, j, k) {
+    blockFace(face, block, i, j, k, ao) {
         const xp =  0.5 + i;
         const xn = -0.5 + i;
         const yp =  0.5 + j;
@@ -87,45 +90,45 @@ class Mesh {
 
         switch(face) {
         case "north":
-            this.vertex(xp, yp, zn, 0, 0, -1, u1, v1);
-            this.vertex(xp, yn, zn, 0, 0, -1, u1, v0);
-            this.vertex(xn, yn, zn, 0, 0, -1, u0, v0);
-            this.vertex(xn, yp, zn, 0, 0, -1, u0, v1);
+            this.vertex(xp, yp, zn, 0, 0, -1, u1, v1, ao[0]);
+            this.vertex(xp, yn, zn, 0, 0, -1, u1, v0, ao[1]);
+            this.vertex(xn, yn, zn, 0, 0, -1, u0, v0, ao[2]);
+            this.vertex(xn, yp, zn, 0, 0, -1, u0, v1, ao[3]);
             this.lastQuad(0, 1, 2, 0, 2, 3);
         break;
         case "south":
-            this.vertex(xn, yp, zp, 0, 0, 1, u0, v1);
-            this.vertex(xn, yn, zp, 0, 0, 1, u0, v0);
-            this.vertex(xp, yn, zp, 0, 0, 1, u1, v0);
-            this.vertex(xp, yp, zp, 0, 0, 1, u1, v1);
+            this.vertex(xn, yp, zp, 0, 0, 1, u0, v1, ao[0]);
+            this.vertex(xn, yn, zp, 0, 0, 1, u0, v0, ao[1]);
+            this.vertex(xp, yn, zp, 0, 0, 1, u1, v0, ao[2]);
+            this.vertex(xp, yp, zp, 0, 0, 1, u1, v1, ao[3]);
             this.lastQuad(0, 1, 2, 0, 2, 3);
         break;
         case "east":
-            this.vertex(xp, yp, zn, 1, 0, 0, u1, v1);
-            this.vertex(xp, yn, zp, 1, 0, 0, u0, v0);
-            this.vertex(xp, yn, zn, 1, 0, 0, u1, v0);
-            this.vertex(xp, yp, zp, 1, 0, 0, u0, v1);
+            this.vertex(xp, yp, zn, 1, 0, 0, u1, v1, ao[0]);
+            this.vertex(xp, yn, zp, 1, 0, 0, u0, v0, ao[1]);
+            this.vertex(xp, yn, zn, 1, 0, 0, u1, v0, ao[2]);
+            this.vertex(xp, yp, zp, 1, 0, 0, u0, v1, ao[3]);
             this.lastQuad(0, 1, 2, 3, 1, 0);
         break;
         case "west":
-            this.vertex(xn, yp, zn, -1, 0, 0, u0, v1);
-            this.vertex(xn, yn, zn, -1, 0, 0, u0, v0);
-            this.vertex(xn, yn, zp, -1, 0, 0, u1, v0);
-            this.vertex(xn, yp, zp, -1, 0, 0, u1, v1);
+            this.vertex(xn, yp, zn, -1, 0, 0, u0, v1, ao[0]);
+            this.vertex(xn, yn, zn, -1, 0, 0, u0, v0, ao[1]);
+            this.vertex(xn, yn, zp, -1, 0, 0, u1, v0, ao[2]);
+            this.vertex(xn, yp, zp, -1, 0, 0, u1, v1, ao[3]);
             this.lastQuad(0, 1, 2, 3, 0, 2);
         break;
         case "top":
-            this.vertex(xn, yp, zp, 0, 1, 0, u0, v0);
-            this.vertex(xp, yp, zp, 0, 1, 0, u1, v0);
-            this.vertex(xn, yp, zn, 0, 1, 0, u0, v1);
-            this.vertex(xp, yp, zn, 0, 1, 0, u1, v1);
+            this.vertex(xn, yp, zp, 0, 1, 0, u0, v0, ao[0]);
+            this.vertex(xp, yp, zp, 0, 1, 0, u1, v0, ao[1]);
+            this.vertex(xn, yp, zn, 0, 1, 0, u0, v1, ao[2]);
+            this.vertex(xp, yp, zn, 0, 1, 0, u1, v1, ao[3]);
             this.lastQuad(0, 1, 2, 2, 1, 3);
         break;
         case "bottom":
-            this.vertex(xn, yn, zp, 0, -1, 0, u0, v1);
-            this.vertex(xn, yn, zn, 0, -1, 0, u0, v0);
-            this.vertex(xp, yn, zp, 0, -1, 0, u1, v1);
-            this.vertex(xp, yn, zn, 0, -1, 0, u1, v0);
+            this.vertex(xn, yn, zp, 0, -1, 0, u0, v1, ao[0]);
+            this.vertex(xn, yn, zn, 0, -1, 0, u0, v0, ao[1]);
+            this.vertex(xp, yn, zp, 0, -1, 0, u1, v1, ao[2]);
+            this.vertex(xp, yn, zn, 0, -1, 0, u1, v0, ao[3]);
             this.lastQuad(0, 1, 2, 1, 3, 2);
         break;
         }

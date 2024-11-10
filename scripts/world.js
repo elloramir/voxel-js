@@ -62,12 +62,13 @@ class World {
     visibleChunks(camera) {
         const cx = Math.floor(camera.position[0] / Chunk.SIZE);
         const cz = Math.floor(camera.position[2] / Chunk.SIZE);
-        const viewDist = 10;
+        const viewDist = 16;
+        const halfViewDist = viewDist / 2;
         const viewSqrDist = viewDist * viewDist * Chunk.SIZE * Chunk.SIZE;
 
         const visibleChunks = [];
-        for (let i = cx - viewDist; i < cx + viewDist; i++) {
-            for (let k = cz - viewDist; k < cz + viewDist; k++) {
+        for (let i = cx - halfViewDist; i < cx + halfViewDist; i++) {
+            for (let k = cz - halfViewDist; k < cz + halfViewDist; k++) {
                 const chunk = this.getChunk(i, k);
 
                 if (chunk) {

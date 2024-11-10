@@ -11,9 +11,9 @@ export default class Frustum {
 
     updatePlanes() {
         // for debugging
-        // this.camera.fov -= 0.3;
+        // this.camera.fov -= 0.5;
         // this.camera.update();
-        // this.camera.fov += 0.3;
+        // this.camera.fov += 0.5;
         const m = this.camera.viewProjMat;
 
         this.planes = [

@@ -103,28 +103,28 @@ class Chunk {
                     if (block === Blocks.EMPTY) {
                         continue;
                     } else if (block === Blocks.WATER) {
-                        this.waterMesh.blockFace("top", block, x, y, z);
+                        // this.waterMesh.blockFace("top", block, x, y, z, [0.75, 0.75, 0.75, 0.75]);
                         continue;
                     }
 
                     // All other visible faces
                     if (this.isTransparent(x, y, z-1)) {
-                        this.groundMesh.blockFace("north", block, x, y, z);
+                        this.groundMesh.blockFace("north", block, x, y, z, this.calculateAO("north", x, y, z));
                     }
                     if (this.isTransparent(x, y, z+1)) {
-                        this.groundMesh.blockFace("south", block, x, y, z);
+                        this.groundMesh.blockFace("south", block, x, y, z, this.calculateAO("south", x, y, z));
                     }
                     if (this.isTransparent(x+1, y, z)) {
-                        this.groundMesh.blockFace("east", block, x, y, z);
+                        this.groundMesh.blockFace("east", block, x, y, z, this.calculateAO("east", x, y, z));
                     }
                     if (this.isTransparent(x-1, y, z)) {
-                        this.groundMesh.blockFace("west", block, x, y, z);
+                        this.groundMesh.blockFace("west", block, x, y, z, this.calculateAO("west", x, y, z));
                     }
                     if (this.isTransparent(x, y+1, z)) {
-                        this.groundMesh.blockFace("top", block, x, y, z);
+                        this.groundMesh.blockFace("top", block, x, y, z, this.calculateAO("top", x, y, z));
                     }
                     if (this.isTransparent(x, y-1, z)) {
-                        this.groundMesh.blockFace("bottom", block, x, y, z);
+                        this.groundMesh.blockFace("bottom", block, x, y, z, this.calculateAO("bottom", x, y, z));
                     }
                 }
             }
@@ -133,4 +133,58 @@ class Chunk {
         this.groundMesh.upload();
         this.waterMesh.upload();
     }
+
+    // @todo: refactor this function and bring a better solution for AO calculation
+    calculateAO(face, x, y, z) {
+        const ao = [];
+
+        switch(face) {
+        case "north":
+            ao[0] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x, y+1, z-1), this.isTransparent(x+1, y+1, z-1));
+            ao[1] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x, y-1, z-1), this.isTransparent(x+1, y-1, z-1));
+            ao[2] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x, y-1, z-1), this.isTransparent(x-1, y-1, z-1));
+            ao[3] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x, y+1, z-1), this.isTransparent(x-1, y+1, z-1));
+        break;
+        case "east":
+            ao[0] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1));
+            ao[1] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1));
+            ao[2] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1));
+            ao[3] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1));
+        break;
+        case "south":
+            ao[0] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x, y+1, z+1), this.isTransparent(x-1, y+1, z+1));
+            ao[1] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x, y-1, z+1), this.isTransparent(x-1, y-1, z+1));
+            ao[2] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x, y-1, z+1), this.isTransparent(x+1, y-1, z+1));
+            ao[3] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x, y+1, z+1), this.isTransparent(x+1, y+1, z+1));
+        break;
+        case "west":
+            ao[0] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1));
+            ao[1] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1));
+            ao[2] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1));
+            ao[3] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1));
+        break;
+        case "top":
+            ao[0] = aoLevel(this.isTransparent(x-1, y+1, z), this.isTransparent(x, y+1, z+1), this.isTransparent(x-1, y+1, z+1));
+            ao[1] = aoLevel(this.isTransparent(x+1, y+1, z), this.isTransparent(x, y+1, z+1), this.isTransparent(x+1, y+1, z+1));
+            ao[2] = aoLevel(this.isTransparent(x-1, y+1, z), this.isTransparent(x, y+1, z-1), this.isTransparent(x-1, y+1, z-1));
+            ao[3] = aoLevel(this.isTransparent(x+1, y+1, z), this.isTransparent(x, y+1, z-1), this.isTransparent(x+1, y+1, z-1));
+        break;
+        case "bottom":
+            ao[0] = aoLevel(this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1), this.isTransparent(x, y-1, z-1));
+            ao[1] = aoLevel(this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1), this.isTransparent(x, y-1, z+1));
+            ao[2] = aoLevel(this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1), this.isTransparent(x, y-1, z-1));
+            ao[3] = aoLevel(this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1), this.isTransparent(x, y-1, z+1));
+        break;
+        }
+
+        return ao;
+    }
+}
+
+
+// 0 is full shadow, 1 is full light
+function aoLevel(side1, side2, corner) {
+    if (side1 && side2) return 0.0;
+    
+    return 3 - (side1 + side2 + corner);
 }
