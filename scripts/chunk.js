@@ -6,6 +6,15 @@ import { mat4, vec4 } from './math.js';
 const NOISE_SMOOTHNESS = 20;
 const WATER_HEIGHT = 4;
 
+
+// An special thanks to Mikola Lysenko
+// for the ambient occlusion article.
+function aoLevel(side1, side2, corner) {
+    if (side1 && side2) return 0.0;
+    
+    return 3 - (side1 + side2 + corner);
+}
+
 export default
 class Chunk {
     static HEIGHT = 10;
@@ -53,7 +62,7 @@ class Chunk {
     }
 
     isTransparent(x, y, z) {
-        // Avoid render bottom
+        // Skip bottom
         if (y < 0) {
             return false;
         }
@@ -134,55 +143,51 @@ class Chunk {
         this.waterMesh.upload();
     }
 
-    // @todo: Refactor this function and bring a better solution for AO calculation
+    // Returns the ambient occlusion for the block at the given position
+    // and given face side. The AO is calculated by checking the neighbors.
     calculateAO(face, x, y, z) {
+        const okay = this.isTransparent.bind(this);
         const ao = [];
 
         switch(face) {
         case "north":
-            ao[0] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x, y+1, z-1), this.isTransparent(x+1, y+1, z-1));
-            ao[1] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x, y-1, z-1), this.isTransparent(x+1, y-1, z-1));
-            ao[2] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x, y-1, z-1), this.isTransparent(x-1, y-1, z-1));
-            ao[3] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x, y+1, z-1), this.isTransparent(x-1, y+1, z-1));
+            ao.push(aoLevel(okay(x+1, y, z-1), okay(x, y+1, z-1), okay(x+1, y+1, z-1)));
+            ao.push(aoLevel(okay(x+1, y, z-1), okay(x, y-1, z-1), okay(x+1, y-1, z-1)));
+            ao.push(aoLevel(okay(x-1, y, z-1), okay(x, y-1, z-1), okay(x-1, y-1, z-1)));
+            ao.push(aoLevel(okay(x-1, y, z-1), okay(x, y+1, z-1), okay(x-1, y+1, z-1)));
         break;
         case "east":
-            ao[0] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1));
-            ao[1] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1));
-            ao[2] = aoLevel(this.isTransparent(x+1, y, z-1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1));
-            ao[3] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1));
+            ao.push(aoLevel(okay(x+1, y, z-1), okay(x+1, y-1, z), okay(x+1, y-1, z-1)));
+            ao.push(aoLevel(okay(x+1, y, z+1), okay(x+1, y-1, z), okay(x+1, y-1, z+1)));
+            ao.push(aoLevel(okay(x+1, y, z-1), okay(x+1, y-1, z), okay(x+1, y-1, z-1)));
+            ao.push(aoLevel(okay(x+1, y, z+1), okay(x+1, y-1, z), okay(x+1, y-1, z+1)));
         break;
         case "south":
-            ao[0] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x, y+1, z+1), this.isTransparent(x-1, y+1, z+1));
-            ao[1] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x, y-1, z+1), this.isTransparent(x-1, y-1, z+1));
-            ao[2] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x, y-1, z+1), this.isTransparent(x+1, y-1, z+1));
-            ao[3] = aoLevel(this.isTransparent(x+1, y, z+1), this.isTransparent(x, y+1, z+1), this.isTransparent(x+1, y+1, z+1));
+            ao.push(aoLevel(okay(x-1, y, z+1), okay(x, y+1, z+1), okay(x-1, y+1, z+1)));
+            ao.push(aoLevel(okay(x-1, y, z+1), okay(x, y-1, z+1), okay(x-1, y-1, z+1)));
+            ao.push(aoLevel(okay(x+1, y, z+1), okay(x, y-1, z+1), okay(x+1, y-1, z+1)));
+            ao.push(aoLevel(okay(x+1, y, z+1), okay(x, y+1, z+1), okay(x+1, y+1, z+1)));
         break;
         case "west":
-            ao[0] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1));
-            ao[1] = aoLevel(this.isTransparent(x-1, y, z-1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1));
-            ao[2] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1));
-            ao[3] = aoLevel(this.isTransparent(x-1, y, z+1), this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1));
+            ao.push(aoLevel(okay(x-1, y, z-1), okay(x-1, y-1, z), okay(x-1, y-1, z-1)));
+            ao.push(aoLevel(okay(x-1, y, z-1), okay(x-1, y-1, z), okay(x-1, y-1, z-1)));
+            ao.push(aoLevel(okay(x-1, y, z+1), okay(x-1, y-1, z), okay(x-1, y-1, z+1)));
+            ao.push(aoLevel(okay(x-1, y, z+1), okay(x-1, y-1, z), okay(x-1, y-1, z+1)));
         break;
         case "top":
-            ao[0] = aoLevel(this.isTransparent(x-1, y+1, z), this.isTransparent(x, y+1, z+1), this.isTransparent(x-1, y+1, z+1));
-            ao[1] = aoLevel(this.isTransparent(x+1, y+1, z), this.isTransparent(x, y+1, z+1), this.isTransparent(x+1, y+1, z+1));
-            ao[2] = aoLevel(this.isTransparent(x-1, y+1, z), this.isTransparent(x, y+1, z-1), this.isTransparent(x-1, y+1, z-1));
-            ao[3] = aoLevel(this.isTransparent(x+1, y+1, z), this.isTransparent(x, y+1, z-1), this.isTransparent(x+1, y+1, z-1));
+            ao.push(aoLevel(okay(x-1, y+1, z), okay(x, y+1, z+1), okay(x-1, y+1, z+1)));
+            ao.push(aoLevel(okay(x+1, y+1, z), okay(x, y+1, z+1), okay(x+1, y+1, z+1)));
+            ao.push(aoLevel(okay(x-1, y+1, z), okay(x, y+1, z-1), okay(x-1, y+1, z-1)));
+            ao.push(aoLevel(okay(x+1, y+1, z), okay(x, y+1, z-1), okay(x+1, y+1, z-1)));
         break;
         case "bottom":
-            ao[0] = aoLevel(this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z-1), this.isTransparent(x, y-1, z-1));
-            ao[1] = aoLevel(this.isTransparent(x-1, y-1, z), this.isTransparent(x-1, y-1, z+1), this.isTransparent(x, y-1, z+1));
-            ao[2] = aoLevel(this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z-1), this.isTransparent(x, y-1, z-1));
-            ao[3] = aoLevel(this.isTransparent(x+1, y-1, z), this.isTransparent(x+1, y-1, z+1), this.isTransparent(x, y-1, z+1));
+            ao.push(aoLevel(okay(x-1, y-1, z), okay(x-1, y-1, z-1), okay(x, y-1, z-1)));
+            ao.push(aoLevel(okay(x-1, y-1, z), okay(x-1, y-1, z+1), okay(x, y-1, z+1)));
+            ao.push(aoLevel(okay(x+1, y-1, z), okay(x+1, y-1, z-1), okay(x, y-1, z-1)));
+            ao.push(aoLevel(okay(x+1, y-1, z), okay(x+1, y-1, z+1), okay(x, y-1, z+1)));
         break;
         }
-
+        
         return ao;
     }
-}
-
-function aoLevel(side1, side2, corner) {
-    if (side1 && side2) return 0.0;
-    
-    return 3 - (side1 + side2 + corner);
 }
